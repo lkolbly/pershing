@@ -45,6 +45,18 @@ The easiest way to use PERSHING is to use the convenience script `main.sh`:
 
 	$ ./main.sh <input Verilog file>
 
+Pin Locations
+-------------
+For reference, pin locations are assigned with input pins (levers) to the west and output pins (redstone lamps) to the east. Pins go north-to-south as they go left-to-right in the verilog.
+
+For example, this module:
+
+	module test(input clk, input incr, input rst, output [1:0] out, output clk_out);
+
+Will, on the west, have clk be north-most, followed by incr, and finally rst is southern-most.
+
+On the east, the LSB of out (out[0]) is northern-most, followed by out[1], followed by clk_out as the southern-most.
+
 Known Issues
 ------------
 Here are some known issues to look out for when generating designs:
