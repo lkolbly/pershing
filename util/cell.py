@@ -39,6 +39,10 @@ class Cell(MaskedSubChunk):
             # Compute new facing
             facing_i = facing_arr.index(d["facing"])
             new_facing_i = (facing_i + turns) % 4
+            """new_facing_i = (facing_i - turns)
+            if new_facing_i < 0:
+                new_facing_i += 4
+            new_facing_i = new_facing_i % 4"""
             new_facing = facing_arr[new_facing_i]
 
             # Compute new coordinates
@@ -64,6 +68,18 @@ class Cell(MaskedSubChunk):
         new_data = new_msc.data
         new_mask = new_msc.mask
 
+        # Rotate the data for repeaters
+        for y in range(len(new_blocks)):
+            for z in range(len(new_blocks[y])):
+                for x in range(len(new_blocks[y,z])):
+                    #print(new_blocks[y, z, x])
+                    if new_blocks[y, z, x] == 93:
+                        rotd = new_data[y, z, x] - turns
+                        if rotd < 0:
+                            rotd += 4
+                        print("Rotating %d %d turns to %d"%(new_data[y,z,x], turns, rotd%4))
+                        new_data[y,z,x] = rotd%4
+
         # port_array = np.zeros_like(new_blocks)
         # for i, (y, z, x) in enumerate(new_ports.itervalues()):
         #     port_array[y, z, x] = i + 1
@@ -75,6 +91,7 @@ class Cell(MaskedSubChunk):
 
 def from_lib(name, cell, pad=0):
     blocks = np.asarray(cell["blocks"], dtype=np.uint8)
+    blocks[blocks == 0] = 20 # Replace all air blocks with glass
     _, width, length = blocks.shape
     data = np.asarray(cell["data"], dtype=np.uint8)
     mask = np.full_like(blocks, True, dtype=np.bool)

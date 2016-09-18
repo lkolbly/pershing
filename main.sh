@@ -29,3 +29,4 @@ rm -rf ${WORLD}
 cp -r template_world ${WORLD}
 
 ./main.py -o ${RESULT_DIR} --world ${WORLD} ${RESULT_DIR}/${BLIF_FILE}
+#python -m cProfile main.py -o ${RESULT_DIR} --world ${WORLD} ${RESULT_DIR}/${BLIF_FILE}

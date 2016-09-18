@@ -435,6 +435,16 @@ class Router:
                     except IndexError:
                         continue
 
+            # Also check how we approach upward vias
+            """if dy > 0:
+                lastpos = self.backtrace_matrix[location]
+                lastdir = (y-lastpos[0], z-lastpos[1], x-lastpos[2])
+                lastpos2 = self.backtrace_matrix[lastpos]
+                lastdir2 = (lastpos[0]-lastpos2[0], lastpos[1]-lastpos2[1], lastpos[2]-lastpos2[2])
+                print("Lastdir=%s, thisdir=%s"%(lastdir, thisdir))
+                if lastdir != lastdir2:
+                    return True"""
+
             return False
 
         # Possible list of movements
@@ -453,6 +463,7 @@ class Router:
 
         # Backtrace is the way you go from the start.
         movements = [MOVE_EAST, MOVE_NORTH, MOVE_WEST, MOVE_SOUTH, MOVE_UP, MOVE_DOWN]
+        backtrace_movements = [MOVE_WEST, MOVE_SOUTH, MOVE_EAST, MOVE_NORTH, MOVE_DOWN, MOVE_UP]
         backtraces = [WEST, SOUTH, EAST, NORTH, DOWN, UP]
         costs = [1, 1, 1, 1, 3, 3]
 
@@ -488,10 +499,34 @@ class Router:
                     if visited[new_location] == 1:
                         continue
 
+                    # We have to approach upward vias in a straight-path fashion
+                    is_not_straight = False
+                    if dy > 0 and location != a:
+                        #print("Hello?")
+                        entry = self.backtrace_matrix[location]
+                        lastmov = backtrace_movements[backtraces.index(entry)]
+                        lastpos = (lastmov[0]+location[0], lastmov[1]+location[1], lastmov[2]+location[2])
+
+                        entry2 = self.backtrace_matrix[lastpos]
+                        if entry2 > 0:
+                            lastmov2 = backtrace_movements[backtraces.index(entry2)]
+
+                            #lastpos = movements[backtraces.index(entry)]
+                            #lastdir = (y-lastpos[0], z-lastpos[1], x-lastpos[2])
+                            #lastpos2 = movements[backtraces.index(self.backtrace_matrix[lastpos])]
+                            #lastdir2 = (lastpos[0]-lastpos2[0], lastpos[1]-lastpos2[1], lastpos[2]-lastpos2[2])
+                            #print("Lastdir=%s, thisdir=%s"%(lastdir, lastdir2))
+                            #print("Lastmov=%s, lastmov2=%s"%(lastmov, lastmov2))
+                            if lastmov != lastmov2:
+                                #print("Via at (%d,%d) is not straight-on"%(location[1], location[2]))
+                                is_not_straight = True
+
                     if violating(new_location):
                         new_location_cost = self.cost_matrix[location] + violation_cost
                     else:
                         new_location_cost = self.cost_matrix[location] + movement_cost
+                    if is_not_straight:
+                        new_location_cost += 100
 
                     # print(location, cost_matrix[location], "->", new_location, cost_matrix[new_location], new_location_cost)
                     if self.cost_matrix[new_location] == -1 or new_location_cost < self.cost_matrix[new_location]:
@@ -507,9 +542,8 @@ class Router:
 
 
         # Backtrace, if a path found
-        backtrace_movements = [MOVE_WEST, MOVE_SOUTH, MOVE_EAST, MOVE_NORTH, MOVE_DOWN, MOVE_UP]
         if visited[b] == 1:
-            net = [b]
+            net = [b] # Don't include b in the route
             while net[-1] != a:
                 last = net[-1]
                 backtrace_entry = self.backtrace_matrix[last]

@@ -278,7 +278,7 @@ class Placer(object):
 
         return wire_length_penalty + overlap_penalty + oob_penalty
 
-    def last_consecutive(l, n):
+    def last_consecutive(self, l, n):
         if len(l) < n:
             return False
         for i in xrange(1,n-1):
@@ -352,8 +352,8 @@ class Placer(object):
                 sys.stdout.flush()
                 prev_width = len(msg)
 
-                # if last_consecutive(prev_scores, 20):
-                #     break
+                if self.last_consecutive(prev_scores, 200):
+                    break
 
                 iteration += 1
 
@@ -460,12 +460,14 @@ class Placer(object):
         for i, input_net_name in enumerate(input_nets):
             coord = [y, z + (pin_spacing * i), x]
             pin_placements.append(create_input_pin(input_net_name, coord))
+            print("Placed input pin %s"%input_net_name)
 
         # place output pins
         x = dimensions[2] + margin
         for i, output_net_name in enumerate(output_nets):
             coord = [y, z + (pin_spacing * i), x]
             pin_placements.append(create_output_pin(output_net_name, coord))
+            print("Placed output pin %s"%output_net_name)
 
         # print("Placed", len(pin_placements), "pins")
 

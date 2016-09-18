@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import random
+import zipfile
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -162,13 +163,9 @@ def extract_redstone_texture(coord, layout):
     return redstone_lut[key]
 
 def create_redstone_textures():
-    redstone_cross_alpha = extract_texture((18, 11)).convert(mode="L")
-    redstone_cross = Image.new("RGB", size=(16, 16), color=(127, 0, 0))
-    redstone_cross.putalpha(redstone_cross_alpha)
+    redstone_cross = Image.open(zf.open(texture_path+"redstone_dust_cross.png"))
 
-    redstone_line_alpha = extract_texture((18, 13)).convert(mode="L")
-    redstone_line = Image.new("RGB", size=(16, 16), color=(127, 0, 0))
-    redstone_line.putalpha(redstone_line_alpha)
+    redstone_line = Image.open(zf.open(texture_path+"redstone_dust_line.png"))
     redstone_line = redstone_line.rotate(90)
 
     # Creates a T (with tee down) from the cross
@@ -216,8 +213,10 @@ def create_redstone_textures():
     return textures
 
 # Load in the textures and build the lookup table
-texture_path = "/Users/qmn/Library/Application Support/minecraft/textures_0.png"
-textures = Image.open(open(texture_path))
+#"/home/lane/Downloads/pershing/tmp/assets/minecraft/textures/blocks/"
+texture_zip_path = "./texturepack.zip"
+texture_path = "assets/minecraft/textures/blocks/"
+zf = zipfile.ZipFile(texture_zip_path)
 
 blank = Image.new("RGBA", (16, 16))
 
@@ -233,12 +232,17 @@ coords = {"stone": (20, 9),
           "sticky_piston": (15, 15),
           "redstone_block": (18, 10),
           "planks": (16, 4),
-          "lever": (10, 13)
+          "lever": (10, 13),
+          "glass": (0,0),
          }
+cvt = {"redstone_lamp": "redstone_lamp_on", "unpowered_repeater": "repeater_off", "powered_repeater": "repeater_on", "unpowered_comparator": "comparator_off", "powered_comparator": "comparator_on", "sticky_piston": "piston_top_sticky", "redstone_torch": "redstone_torch_on", "unlit_redstone_torch": "redstone_torch_off", "planks": "planks_oak"}
 
 lut = {"air": blank}
 for name, coord in coords.iteritems():
-    lut[name] = extract_texture(coord)
+    newname = name
+    if name in cvt:
+        newname = cvt[name]
+    lut[name] = Image.open(zf.open(texture_path + "%s.png"%newname))
 
 conductivity_list_names = ["redstone_wire", "redstone_torch", "unlit_redstone_torch", "powered_repeater", "unpowered_repeater", "unpowered_comparator", "powered_comparator"]
 conductivity_list = [blocks.block_names.index(n) for n in conductivity_list_names]

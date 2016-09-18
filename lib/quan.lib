@@ -38,20 +38,6 @@ library(quan) {
     }
   }
 
-  cell(XOR) {
-    area: 18
-    pin(A) {
-      direction: input;
-    }
-    pin(Y) {
-      function: "(A^B)";
-      direction: output;
-    }
-    pin(B) {
-      direction: input;
-    }
-  }
-
   cell(DFF) {
     area: 12
     ff(IQ, IQN) {
